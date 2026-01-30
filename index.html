@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Arete">
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="arete-manifest.json">
+    <title>Arete</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            touch-action: pan-y;
+        }
+
+        /* Sunset gradient background */
+        .app-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, 
+                #000000 0%,
+                #1a0a0a 20%,
+                #4a1a1a 40%,
+                #d4755e 60%,
+                #f4a261 70%,
+                #f9e07f 85%,
+                #fef3c7 100%
+            );
+            z-index: -1;
+        }
+
+        /* Mountain silhouette */
+        .mountains {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 35vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .mountain {
+            position: absolute;
+            bottom: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+
+        .mountain-1 {
+            left: -10%;
+            border-width: 0 25vw 35vh 25vw;
+            border-color: transparent transparent #000 transparent;
+        }
+
+        .mountain-2 {
+            left: 20%;
+            border-width: 0 30vw 28vh 30vw;
+            border-color: transparent transparent #0a0a0a transparent;
+        }
+
+        .mountain-3 {
+            right: -5%;
+            border-width: 0 35vw 32vh 35vw;
+            border-color: transparent transparent #050505 transparent;
+        }
+
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            padding: 20px 20px 15px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f9e07f, #f4a261, #d4755e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #d4755e, #f4a261, #f9e07f);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 8px;
+        }
+
+        /* Main workout area */
+        .workout-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workout-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 20px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .workout-card.completed {
+            opacity: 0.6;
+        }
+
+        .day-header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .day-number {
+            font-size: 14px;
+            font-weight: 700;
+            color: #f9e07f;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+        }
+
+        .day-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .day-date {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .exercises-list {
+            flex: 1;
+        }
+
+        .exercise-block {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .exercise-block.completed {
+            border-color: #f9e07f;
+            background: rgba(249, 224, 127, 0.1);
+        }
+
+        .exercise-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .sets-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .set-row {
+            display: grid;
+            grid-template-columns: 40px 1fr 1fr 40px;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .set-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #f4a261;
+        }
+
+        .set-input {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .set-input:focus {
+            outline: none;
+            border-color: #f9e07f;
+            background: rgba(249, 224, 127, 0.1);
+        }
+
+        .set-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .set-check {
+            width: 32px;
+            height: 32px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .set-check.checked {
+            background: linear-gradient(135deg, #f9e07f, #f4a261);
+            border-color: #f9e07f;
+        }
+
+        .set-check.checked::after {
+            content: '✓';
+            color: #000;
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        /* Notes section */
+        .notes-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .notes-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+        }
+
+        .notes-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 12px;
+            color: #fff;
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            min-height: 60px;
+        }
+
+        .notes-input:focus {
+            outline: none;
+            border-color: #f9e07f;
+            background: rgba(249, 224, 127, 0.1);
+        }
+
+        .notes-display {
+            background: rgba(249, 224, 127, 0.15);
+            border: 1px solid rgba(249, 224, 127, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            color: #f9e07f;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            padding: 16px 20px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 16px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-complete {
+            background: linear-gradient(135deg, #d4755e, #f4a261, #f9e07f);
+            color: #000;
+            box-shadow: 0 4px 20px rgba(249, 224, 127, 0.4);
+        }
+
+        .btn-complete:active {
+            transform: scale(0.98);
+        }
+
+        .btn-complete:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-uncomplete {
+            background: rgba(212, 117, 94, 0.3);
+            color: #d4755e;
+            border: 2px solid #d4755e;
+        }
+
+        /* Navigation dots */
+        .nav-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: linear-gradient(135deg, #f9e07f, #f4a261);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .dot.completed {
+            background: rgba(249, 224, 127, 0.6);
+        }
+
+        /* Completion overlay */
+        .completion-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .completion-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .completion-content {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .completion-content .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .completion-content h2 {
+            font-size: 32px;
+            background: linear-gradient(135deg, #f9e07f, #f4a261, #d4755e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .completion-content p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-background"></div>
+    <div class="mountains">
+        <div class="mountain mountain-1"></div>
+        <div class="mountain mountain-2"></div>
+        <div class="mountain mountain-3"></div>
+    </div>
+
+    <div class="app-container">
+        <div class="header">
+            <h1>ARETE</h1>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Day 1 of 24</div>
+        </div>
+
+        <div class="workout-container" id="workoutContainer">
+            <!-- Workout cards will be dynamically inserted here -->
+        </div>
+
+        <div class="action-buttons" id="actionButtons">
+            <button class="btn btn-complete" id="completeBtn">Mark Complete</button>
+        </div>
+
+        <div class="nav-dots" id="navDots"></div>
+    </div>
+
+    <div class="completion-overlay" id="completionOverlay">
+        <div class="completion-content">
+            <div class="icon">🏔️</div>
+            <h2>Cycle Complete!</h2>
+            <p>You've conquered all 6 weeks. Time to climb the next peak.</p>
+        </div>
+    </div>
+
+    <script>
+        const workouts = [
+            // Week 1
+            {
+                day: 1,
+                week: 1,
+                date: "MON",
+                title: "Chest Focus",
+                exercises: [
+                    { name: "Deficit Push Ups", sets: [{weight: 0, reps: 20}, {weight: 0, reps: 17}, {weight: 0, reps: 14}] },
+                    { name: "Incline Bench Press", sets: [{weight: 50, reps: 14}, {weight: 50, reps: 12}, {weight: 50, reps: 10}] },
+                    { name: "Machine Chest Fly", sets: [{weight: 130, reps: 15}, {weight: 130, reps: 13}, {weight: 130, reps: 11}] },
+                    { name: "Rear Delt Fly", sets: [{weight: 90, reps: 18}, {weight: 90, reps: 14}, {weight: 90, reps: 11}] },
+                    { name: "Bodyweight Dips", sets: [{weight: 0, reps: 14}, {weight: 0, reps: 11}, {weight: 0, reps: 9}] },
+                    { name: "Cross Body Cable Shoulder Raises", sets: [{weight: 20, reps: 14}, {weight: 20, reps: 12}, {weight: 20, reps: 10}] },
+                    { name: "GHD Sit-ups", sets: [{weight: 0, reps: 20}, {weight: 0, reps: 16}, {weight: 0, reps: 12}] },
+                    { name: "Leg Extensions", sets: [{weight: 80, reps: 15}, {weight: 80, reps: 14}, {weight: 80, reps: 13}] }
+                ]
+            },
+            {
+                day: 2,
+                week: 1,
+                date: "TUE",
+                title: "Back Focus",
+                exercises: [
+                    { name: "Narrow Grip Lat Pull Down", sets: [{weight: 140, reps: 16}, {weight: 140, reps: 14}, {weight: 140, reps: 12}] },
+                    { name: "Single Arm Kneeling Cable Row", sets: [{weight: 110, reps: 17}, {weight: 110, reps: 15}, {weight: 110, reps: 13}] },
+                    { name: "Seated Cable Row", sets: [{weight: 140, reps: 15}, {weight: 140, reps: 13}, {weight: 140, reps: 11}] },
+                    { name: "Cable Bicep Curls", sets: [{weight: 27, reps: 14}, {weight: 27, reps: 12}, {weight: 27, reps: 8}] },
+                    { name: "Cross Body Cable Shoulder Raises", sets: [{weight: 20, reps: 14}, {weight: 20, reps: 12}, {weight: 20, reps: 10}] },
+                    { name: "GHD Sit-ups", sets: [{weight: 0, reps: 20}, {weight: 0, reps: 16}, {weight: 0, reps: 12}] },
+                    { name: "Lunges", sets: [{weight: 140, reps: 16}, {weight: 140, reps: 14}, {weight: 140, reps: 12}] }
+                ]
+            },
+            {
+                day: 3,
+                week: 1,
+                date: "THU",
+                title: "Leg Focus",
+                exercises: [
+                    { name: "Lying Leg Curls", sets: [{weight: 70, reps: 12}, {weight: 70, reps: 11}, {weight: 70, reps: 10}] },
+                    { name: "Leg Press", sets: [{weight: 405, reps: 18}, {weight: 405, reps: 16}, {weight: 405, reps: 14}] },
+                    { name: "Leg Extensions", sets: [{weight: 80, reps: 15}, {weight: 80, reps: 13}, {weight: 80, reps: 11}] },
+                    { name: "Leg Press Calf Raises", sets: [{weight: 405, reps: 14}, {weight: 405, reps: 12}, {weight: 405, reps: 10}] },
+                    { name: "Lunges", sets: [{weight: 120, reps: 16}, {weight: 120, reps: 14}, {weight: 120, reps: 12}] }
+                ]
+            },
+            {
+                day: 4,
+                week: 1,
+                date: "SAT",
+                title: "Even Split",
+                exercises: [
+                    { name: "Deficit Push Ups", sets: [{weight: 0, reps: 20}, {weight: 0, reps: 17}, {weight: 0, reps: 14}] },
+                    { name: "Incline Bench Press", sets: [{weight: 50, reps: 14}, {weight: 50, reps: 12}, {weight: 50, reps: 10}] },
+                    { name: "Narrow Grip Lat Pull Down", sets: [{weight: 140, reps: 16}, {weight: 140, reps: 14}, {weight: 140, reps: 12}] },
+                    { name: "Seated Cable Row", sets: [{weight: 140, reps: 15}, {weight: 140, reps: 13}, {weight: 140, reps: 11}] },
+                    { name: "Cross Body Cable Shoulder Raises", sets: [{weight: 20, reps: 14}, {weight: 20, reps: 12}, {weight: 20, reps: 10}] },
+                    { name: "Bodyweight Dips", sets: [{weight: 0, reps: 14}, {weight: 0, reps: 11}, {weight: 0, reps: 9}] },
+                    { name: "Leg Press", sets: [{weight: 405, reps: 17}, {weight: 405, reps: 15}, {weight: 405, reps: 13}] }
+                ]
+            }
+        ];
+
+        // Replicate the 4 days across 6 weeks (24 total days)
+        const allWorkouts = [];
+        for (let week = 1; week <= 6; week++) {
+            workouts.forEach((workout, idx) => {
+                const dayData = JSON.parse(JSON.stringify(workout)); // Deep clone
+                dayData.week = week;
+                dayData.absoluteDay = (week - 1) * 4 + idx + 1;
+                
+                // Apply deload for week 6
+                if (week === 6) {
+                    dayData.exercises = dayData.exercises.map(ex => ({
+                        ...ex,
+                        sets: ex.sets.map(s => ({
+                            weight: s.weight * 0.5,
+                            reps: s.reps
+                        })).slice(0, -1) // Remove last set
+                    }));
+                }
+                
+                allWorkouts.push(dayData);
+            });
+        }
+
+        let currentDay = 0;
+        let completionData = JSON.parse(localStorage.getItem('areteProgress')) || {};
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        function init() {
+            renderWorkouts();
+            updateProgress();
+            updateNavDots();
+            setupSwipeListeners();
+            
+            // Find first incomplete workout
+            for (let i = 0; i < allWorkouts.length; i++) {
+                if (!completionData[i]) {
+                    currentDay = i;
+                    break;
+                }
+            }
+            
+            showDay(currentDay);
+        }
+
+        function renderWorkouts() {
+            const container = document.getElementById('workoutContainer');
+            container.innerHTML = '';
+            
+            allWorkouts.forEach((workout, index) => {
+                const card = document.createElement('div');
+                card.className = `workout-card ${completionData[index] ? 'completed' : ''}`;
+                card.id = `workout-${index}`;
+                
+                let exercisesHTML = '';
+                workout.exercises.forEach((exercise, exIdx) => {
+                    const savedData = completionData[index]?.exercises?.[exIdx] || { sets: [] };
+                    const isCompleted = savedData.completed || false;
+                    
+                    let setsHTML = '';
+                    exercise.sets.forEach((set, setIdx) => {
+                        const savedSet = savedData.sets[setIdx] || {};
+                        const weight = savedSet.weight !== undefined ? savedSet.weight : set.weight;
+                        const reps = savedSet.reps !== undefined ? savedSet.reps : set.reps;
+                        const checked = savedSet.checked || false;
+                        
+                        setsHTML += `
+                            <div class="set-row">
+                                <div class="set-label">Set ${setIdx + 1}</div>
+                                <input type="number" class="set-input" 
+                                    placeholder="${set.weight}lbs" 
+                                    value="${weight || ''}"
+                                    data-day="${index}" 
+                                    data-exercise="${exIdx}" 
+                                    data-set="${setIdx}" 
+                                    data-type="weight"
+                                    ${completionData[index] ? 'readonly' : ''}>
+                                <input type="number" class="set-input" 
+                                    placeholder="${set.reps} reps" 
+                                    value="${reps || ''}"
+                                    data-day="${index}" 
+                                    data-exercise="${exIdx}" 
+                                    data-set="${setIdx}" 
+                                    data-type="reps"
+                                    ${completionData[index] ? 'readonly' : ''}>
+                                <div class="set-check ${checked ? 'checked' : ''}" 
+                                    data-day="${index}" 
+                                    data-exercise="${exIdx}" 
+                                    data-set="${setIdx}"
+                                    ${completionData[index] ? 'style="pointer-events:none"' : ''}></div>
+                            </div>
+                        `;
+                    });
+                    
+                    exercisesHTML += `
+                        <div class="exercise-block ${isCompleted ? 'completed' : ''}">
+                            <div class="exercise-name">${exercise.name}</div>
+                            <div class="sets-container">
+                                ${setsHTML}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                card.innerHTML = `
+                    <div class="day-header">
+                        <div class="day-number">Week ${workout.week} · Day ${workout.day}</div>
+                        <div class="day-title">${workout.title}</div>
+                        <div class="day-date">${workout.date}</div>
+                    </div>
+                    <div class="exercises-list">
+                        ${exercisesHTML}
+                        ${completionData[index] ? `
+                            <div class="notes-section">
+                                <div class="notes-label">Workout Notes</div>
+                                <div class="notes-display">${completionData[index].notes || 'No notes'}</div>
+                            </div>
+                        ` : `
+                            <div class="notes-section">
+                                <div class="notes-label">Workout Notes (optional)</div>
+                                <textarea class="notes-input" id="notes-${index}" placeholder="How did it feel? Any PRs?"></textarea>
+                            </div>
+                        `}
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            // Add event listeners for inputs and checkboxes
+            document.querySelectorAll('.set-input').forEach(input => {
+                input.addEventListener('input', saveSetData);
+            });
+            
+            document.querySelectorAll('.set-check').forEach(check => {
+                check.addEventListener('click', toggleSetCheck);
+            });
+        }
+
+        function saveSetData(e) {
+            const day = parseInt(e.target.dataset.day);
+            const exercise = parseInt(e.target.dataset.exercise);
+            const set = parseInt(e.target.dataset.set);
+            const type = e.target.dataset.type;
+            const value = parseFloat(e.target.value) || 0;
+            
+            if (!completionData[day]) {
+                completionData[day] = { exercises: [] };
+            }
+            
+            if (!completionData[day].exercises[exercise]) {
+                completionData[day].exercises[exercise] = { sets: [] };
+            }
+            
+            if (!completionData[day].exercises[exercise].sets[set]) {
+                completionData[day].exercises[exercise].sets[set] = {};
+            }
+            
+            completionData[day].exercises[exercise].sets[set][type] = value;
+            localStorage.setItem('areteProgress', JSON.stringify(completionData));
+        }
+
+        function toggleSetCheck(e) {
+            const day = parseInt(e.target.dataset.day);
+            const exercise = parseInt(e.target.dataset.exercise);
+            const set = parseInt(e.target.dataset.set);
+            
+            if (!completionData[day]) {
+                completionData[day] = { exercises: [] };
+            }
+            
+            if (!completionData[day].exercises[exercise]) {
+                completionData[day].exercises[exercise] = { sets: [] };
+            }
+            
+            if (!completionData[day].exercises[exercise].sets[set]) {
+                completionData[day].exercises[exercise].sets[set] = {};
+            }
+            
+            const isChecked = completionData[day].exercises[exercise].sets[set].checked;
+            completionData[day].exercises[exercise].sets[set].checked = !isChecked;
+            
+            e.target.classList.toggle('checked');
+            localStorage.setItem('areteProgress', JSON.stringify(completionData));
+        }
+
+        function showDay(index) {
+            const cards = document.querySelectorAll('.workout-card');
+            cards.forEach((card, i) => {
+                if (i < index) {
+                    card.style.transform = 'translateX(-100%)';
+                    card.style.opacity = '0';
+                } else if (i === index) {
+                    card.style.transform = 'translateX(0)';
+                    card.style.opacity = '1';
+                } else {
+                    card.style.transform = 'translateX(100%)';
+                    card.style.opacity = '0';
+                }
+            });
+            
+            currentDay = index;
+            updateActionButton();
+            updateNavDots();
+            updateProgress();
+        }
+
+        function updateActionButton() {
+            const btnContainer = document.getElementById('actionButtons');
+            const isCompleted = completionData[currentDay]?.completed;
+            
+            if (isCompleted) {
+                btnContainer.innerHTML = `
+                    <button class="btn btn-uncomplete" onclick="uncompleteDay()">Mark Incomplete</button>
+                `;
+            } else {
+                btnContainer.innerHTML = `
+                    <button class="btn btn-complete" onclick="completeDay()">Mark Complete</button>
+                `;
+            }
+        }
+
+        function completeDay() {
+            const notesInput = document.getElementById(`notes-${currentDay}`);
+            const notes = notesInput ? notesInput.value : '';
+            
+            if (!completionData[currentDay]) {
+                completionData[currentDay] = { exercises: [] };
+            }
+            
+            completionData[currentDay].completed = true;
+            completionData[currentDay].date = new Date().toISOString();
+            completionData[currentDay].notes = notes;
+            
+            localStorage.setItem('areteProgress', JSON.stringify(completionData));
+            
+            // Check if this is the last workout
+            if (currentDay === allWorkouts.length - 1) {
+                showCompletionOverlay();
+                return;
+            }
+            
+            // Move to next day
+            renderWorkouts();
+            setTimeout(() => {
+                showDay(currentDay + 1);
+            }, 300);
+        }
+
+        function uncompleteDay() {
+            if (completionData[currentDay]) {
+                completionData[currentDay].completed = false;
+            }
+            localStorage.setItem('areteProgress', JSON.stringify(completionData));
+            renderWorkouts();
+            showDay(currentDay);
+        }
+
+        function updateProgress() {
+            const completed = Object.values(completionData).filter(d => d.completed).length;
+            const total = allWorkouts.length;
+            const percentage = (completed / total) * 100;
+            
+            const currentWorkout = allWorkouts[currentDay];
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+            document.getElementById('progressText').textContent = 
+                `Week ${currentWorkout.week}/6 · Day ${currentDay + 1} of ${total} · ${completed} completed`;
+        }
+
+        function updateNavDots() {
+            const dotsContainer = document.getElementById('navDots');
+            dotsContainer.innerHTML = '';
+            
+            // Show dots for current week (4 days)
+            const currentWeek = allWorkouts[currentDay].week;
+            const startDay = (currentWeek - 1) * 4;
+            const endDay = startDay + 4;
+            
+            for (let i = startDay; i < endDay; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                if (i === currentDay) dot.classList.add('active');
+                if (completionData[i]?.completed) dot.classList.add('completed');
+                dot.onclick = () => showDay(i);
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        function setupSwipeListeners() {
+            const container = document.getElementById('workoutContainer');
+            
+            container.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+            
+            container.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            });
+        }
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0 && currentDay < allWorkouts.length - 1) {
+                    showDay(currentDay + 1);
+                } else if (diff < 0 && currentDay > 0) {
+                    showDay(currentDay - 1);
+                }
+            }
+        }
+
+        function showCompletionOverlay() {
+            const overlay = document.getElementById('completionOverlay');
+            overlay.classList.add('show');
+            
+            setTimeout(() => {
+                overlay.classList.remove('show');
+                renderWorkouts();
+                showDay(currentDay);
+            }, 3000);
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
