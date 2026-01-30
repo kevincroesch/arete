@@ -52,7 +52,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 35vh;
+            height: 20vh;
             z-index: 0;
             pointer-events: none;
         }
@@ -67,19 +67,19 @@
 
         .mountain-1 {
             left: -10%;
-            border-width: 0 25vw 35vh 25vw;
+            border-width: 0 25vw 20vh 25vw;
             border-color: transparent transparent #000 transparent;
         }
 
         .mountain-2 {
             left: 20%;
-            border-width: 0 30vw 28vh 30vw;
+            border-width: 0 30vw 16vh 30vw;
             border-color: transparent transparent #0a0a0a transparent;
         }
 
         .mountain-3 {
             right: -5%;
-            border-width: 0 35vw 32vh 35vw;
+            border-width: 0 35vw 18vh 35vw;
             border-color: transparent transparent #050505 transparent;
         }
 
@@ -93,20 +93,20 @@
 
         /* Header */
         .header {
-            padding: 20px 20px 15px;
+            padding: 15px 16px 12px;
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .header h1 {
-            font-size: 32px;
+            font-size: 26px;
             font-weight: 800;
             background: linear-gradient(135deg, #f9e07f, #f4a261, #d4755e);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             letter-spacing: 2px;
         }
 
@@ -143,11 +143,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            padding: 20px;
+            padding: 12px;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
             display: flex;
             flex-direction: column;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .workout-card.completed {
@@ -157,30 +158,30 @@
         .day-header {
             background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 20px;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .day-number {
-            font-size: 14px;
+            font-size: 11px;
             font-weight: 700;
             color: #f9e07f;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 6px;
-        }
-
-        .day-title {
-            font-size: 24px;
-            font-weight: 800;
-            color: #fff;
+            letter-spacing: 1px;
             margin-bottom: 4px;
         }
 
+        .day-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
         .day-date {
-            font-size: 14px;
+            font-size: 12px;
             color: rgba(255, 255, 255, 0.7);
         }
 
@@ -191,9 +192,9 @@
         .exercise-block {
             background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 12px;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
             border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
@@ -203,27 +204,27 @@
         }
 
         .exercise-name {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
             color: #fff;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .sets-container {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .set-row {
             display: grid;
-            grid-template-columns: 40px 1fr 1fr 40px;
-            gap: 8px;
+            grid-template-columns: 30px 70px 70px 28px;
+            gap: 6px;
             align-items: center;
         }
 
         .set-label {
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 600;
             color: #f4a261;
         }
@@ -232,9 +233,9 @@
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
-            padding: 10px;
+            padding: 8px 6px;
             color: #fff;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             text-align: center;
         }
@@ -250,8 +251,8 @@
         }
 
         .set-check {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             display: flex;
@@ -269,35 +270,35 @@
         .set-check.checked::after {
             content: '✓';
             color: #000;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 900;
         }
 
         /* Notes section */
         .notes-section {
-            margin-top: 16px;
-            padding-top: 16px;
+            margin-top: 12px;
+            padding-top: 12px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .notes-label {
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 600;
             color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .notes-input {
             width: 100%;
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 12px;
+            border-radius: 8px;
+            padding: 10px;
             color: #fff;
-            font-size: 14px;
+            font-size: 13px;
             font-family: inherit;
             resize: none;
-            min-height: 60px;
+            min-height: 50px;
         }
 
         .notes-input:focus {
@@ -318,17 +319,17 @@
 
         /* Action buttons */
         .action-buttons {
-            padding: 16px 20px 20px;
+            padding: 12px 16px 16px;
             background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
         }
 
         .btn {
             width: 100%;
-            padding: 18px;
+            padding: 14px;
             border: none;
-            border-radius: 16px;
-            font-size: 17px;
+            border-radius: 14px;
+            font-size: 16px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -363,15 +364,15 @@
         .nav-dots {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            padding: 15px;
+            gap: 6px;
+            padding: 10px;
             background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(10px);
         }
 
         .dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.3);
             transition: all 0.3s ease;
@@ -379,8 +380,8 @@
 
         .dot.active {
             background: linear-gradient(135deg, #f9e07f, #f4a261);
-            width: 24px;
-            border-radius: 4px;
+            width: 20px;
+            border-radius: 3px;
         }
 
         .dot.completed {
