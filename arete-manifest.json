@@ -2,7 +2,7 @@
   "name": "Arete",
   "short_name": "Arete",
   "description": "6-Week Strength Training Program",
-  "start_url": "./arete.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
